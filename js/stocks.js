@@ -2,19 +2,19 @@ var modal = document.getElementById("myModal");
 var btn = document.getElementById("myBtn");
 var span = document.getElementsByClassName("close")[0];
 
-btn.onclick = function() {
+btn.onclick = function () {
   modal.style.display = "block";
-}
+};
 
-span.onclick = function() {
+span.onclick = function () {
   modal.style.display = "none";
-}
+};
 
-window.onclick = function(event) {
+window.onclick = function (event) {
   if (event.target == modal) {
     modal.style.display = "none";
   }
-}
+};
 // const url = 'https://twelve-data1.p.rapidapi.com/stocks?exchange=NASDAQ&format=json';
 // const options = {
 // 	method: 'GET',
@@ -46,3 +46,21 @@ window.onclick = function(event) {
 // } catch (error) {
 // 	console.error(error);
 // }
+
+let amount = 0;
+
+document.getElementById("amountInput").onchange = function () {
+  initAmount();
+};
+
+function initAmount() {
+  var x = document.getElementById("amountInput");
+  if(!isNaN(x.value)){
+    amount = x.value;
+    document.getElementById("amountInput").disabled = true;
+  }
+  else{
+    x.value = 100;
+    alert("Please enter a number");
+  }
+}
