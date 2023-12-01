@@ -11,6 +11,8 @@
       integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
       crossorigin="anonymous"
     />
+    <script src="https://cdn.jsdelivr.net/npm/thedatepicker@latest/dist/the-datepicker.min.js"></script>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/thedatepicker@latest/dist/the-datepicker.css">
   </head>
 
   <body>
@@ -26,12 +28,11 @@
       id = "myBtn"
       type="button"
       class="btn btn-primary"
-      data-bs-toggle="modal"
-      data-bs-target="#exampleModal"
     >
       Edit API Key and Host
     </button>
-
+    <br>
+    <input type="text" id="my-input">
     <div id="myModal" class="modal">
       <div class="modal-content">
         <span class="close">&times;</span>
@@ -45,7 +46,7 @@
               <input type="text" class="form-control" id="hostInput">
           </div>
           <div class="mb-3">
-            <button type="submit" class="btn btn-primary">Submit</button>
+            <button type="submit" class="btn btn-primary" id = "modal_submit">Submit</button>
         </div>
         </form></p>
       </div>
@@ -55,7 +56,8 @@
       <input type="text" class="form-control" id="amountInput">
     </div>
     <div class="mb-3">
-      <button type="submit" class="btn btn-primary">Select Stock</button>
+      
+      <button type="submit" class="btn btn-primary">Add Stock +</button>
     </div>
     <script src="js/stocks.js"></script>
   </body>

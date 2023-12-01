@@ -15,37 +15,6 @@ window.onclick = function (event) {
     modal.style.display = "none";
   }
 };
-// const url = 'https://twelve-data1.p.rapidapi.com/stocks?exchange=NASDAQ&format=json';
-// const options = {
-// 	method: 'GET',
-// 	headers: {
-// 		'X-RapidAPI-Key': '554b60018emsha0343cd9e4c54ccp1af5b1jsn28e86cee8a6c',
-// 		'X-RapidAPI-Host': 'twelve-data1.p.rapidapi.com'
-// 	}
-// };
-
-// try {
-// 	const response = await fetch(url, options);
-// 	const result = await response.text();
-// 	console.log(result);
-// } catch (error) {
-// 	console.error(error);
-// }
-// const urlE = 'https://twelve-data1.p.rapidapi.com/time_series?interval=1day&symbol=AMZN&format=json&outputsize=30';
-// const optionsE = {
-// 	method: 'GET',
-// 	headers: {
-// 		'X-RapidAPI-Key': '554b60018emsha0343cd9e4c54ccp1af5b1jsn28e86cee8a6c',
-// 		'X-RapidAPI-Host': 'twelve-data1.p.rapidapi.com'
-// 	}
-// };
-// try {
-// 	const responseE = await fetch(urlE, optionsE);
-// 	const resultE = await responseE.text();
-// 	console.log(resultE);
-// } catch (error) {
-// 	console.error(error);
-// }
 
 let amount = 0;
 
@@ -55,12 +24,24 @@ document.getElementById("amountInput").onchange = function () {
 
 function initAmount() {
   var x = document.getElementById("amountInput");
-  if(!isNaN(x.value)){
+  if (!isNaN(x.value)) {
     amount = x.value;
     document.getElementById("amountInput").disabled = true;
-  }
-  else{
+  } else {
     x.value = 100;
     alert("Please enter a number");
   }
 }
+
+
+const input = document.getElementById("my-input");
+const datepicker = new TheDatepicker.Datepicker(input);
+datepicker.render();
+
+var bttn = document.getElementById("modal_submit");
+bttn.onclick = function () {
+  let apikey = document.getElementById("keyInput").value;
+  let hostkey = document.getElementById("hostInput").value;
+  console.log(apikey);
+  console.log(hostkey);
+};
