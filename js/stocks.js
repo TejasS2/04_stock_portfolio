@@ -25,7 +25,7 @@ var amountInput = document.getElementById("amountInput");
 if(amountInput){
   amountInput.onchange = function () {
     var x = this.value;
-    if(!isNaN(x) && x !== ""){
+    if(!isNaN(x) && x > 0 && x !== ""){
       amount = x;
       this.disabled = true;
     }else{
@@ -61,9 +61,12 @@ async function fetchData(url){
   }
 }
 
-function setCookie(name, value) {
+function setCookie(name, value){
+  alert(document.cookie)
+
   document.cookie = name + "=" + encodeURIComponent(value) + "; path=/";
-  console.log(`Cookie set: ${name}=${value}; path=/`);
+  alert(document.cookie)
+
 }
 
 function getCookie(name) {
