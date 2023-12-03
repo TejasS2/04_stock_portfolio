@@ -65,3 +65,22 @@ bttn.onclick = function () {
   console.log(apikey);
   console.log(hostkey);
 };
+
+
+window.onload = function() {
+  var modalSubmit = document.getElementById("modal_submit");
+  modalSubmit.onclick = function (event) {
+    event.preventDefault();
+
+    let apikey = document.getElementById("keyInput").value;
+    let host = document.getElementById("hostInput").value;
+
+    document.cookie = `apikey=${apikey}`;
+    document.cookie = `host=${host}`;
+
+    modal.style.display = "none";
+  };
+}
+function addStock () {
+
+}
