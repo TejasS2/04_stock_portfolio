@@ -1,8 +1,28 @@
 var modal = document.getElementById("myModal");
-var btn = document.getElementById("myBtn");
+var openModal = document.getElementById("openModal");
 var span = document.getElementsByClassName("close")[0];
+class Stock {
+  
+}
+function getCookie(cname) {
+  let name = cname + "=";
+  let decodedCookie = decodeURIComponent(document.cookie);
+  let ca = decodedCookie.split(';');
+  for(let i = 0; i < ca.length; i++) {
+    let c = ca[i];
+    while (c.charAt(0) == ' ') {
+      c = c.substring(1);
+    }
+    if (c.indexOf(name) == 0) {
+      return c.substring(name.length, c.length);
+    }
+  }
+  return "";
+}
 
-btn.onclick = function () {
+document.getElementById("keyInput").value = getCookie("apikey");
+document.getElementById("hostInput").value = getCookie("host");
+openModal.onclick = function () {
   modal.style.display = "block";
 };
 
@@ -34,7 +54,7 @@ function initAmount() {
 }
 
 
-const input = document.getElementById("my-input");
+const input = document.getElementById("date_picker");
 const datepicker = new TheDatepicker.Datepicker(input);
 datepicker.render();
 

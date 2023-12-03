@@ -13,7 +13,7 @@
       crossorigin="anonymous"
     />
     <script src="https://cdn.jsdelivr.net/npm/thedatepicker@latest/dist/the-datepicker.min.js"></script>
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/thedatepicker@latest/dist/the-datepicker.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/thedatepicker@latest/dist/the-datepicker.css">
   </head>
 
   <body>
@@ -26,21 +26,21 @@
       crossorigin="anonymous"
     ></script>
     <button
-      id = "myBtn"
+      id = "openModal"
       type="button"
       class="btn btn-primary"
     >
       Edit API Key and Host
     </button>
     <br>
-    <input type="text" id="my-input">
+
     <div id="myModal" class="modal">
       <div class="modal-content">
         <span class="close">&times;</span>
         <p><form>
           <div class="mb-3">
             <label for="key" class="form-label">API Key</label>
-            <input type="text" class="form-control form-control-lg" id="keyInput">
+            <input type="text" class="form-control" id="keyInput">
           </div>
           <div class="mb-3">
               <label for="host" class="form-label">Host</label>
@@ -56,10 +56,10 @@
       <label for="amount" class="form-label">Initial Amount</label>
       <input type="text" class="form-control" id="amountInput">
     </div>
-    <div class="mb-3">
-      
+    <div class="mb-3">  
       <button type="submit" class="btn btn-primary">Add Stock +</button>
     </div>
+    <input type="text" id="date_picker">
     <script src="js/stocks.js"></script>
   </body>
 </html>
