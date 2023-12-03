@@ -40,8 +40,8 @@ datepicker.render();
 
 var bttn = document.getElementById("modal_submit");
 bttn.onclick = function () {
-  let apikey = document.getElementById("keyInput").value;
-  let hostkey = document.getElementById("hostInput").value;
+  var apikey = document.getElementById("keyInput").value;
+  var hostkey = document.getElementById("hostInput").value;
   console.log(apikey);
   console.log(hostkey);
 };
