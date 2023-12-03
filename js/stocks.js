@@ -1,8 +1,28 @@
 var modal = document.getElementById("myModal");
-var btn = document.getElementById("myBtn");
+var openModal = document.getElementById("openModal");
 var span = document.getElementsByClassName("close")[0];
+class Stock {
+  
+}
+function getCookie(cname) {
+  let name = cname + "=";
+  let decodedCookie = decodeURIComponent(document.cookie);
+  let ca = decodedCookie.split(';');
+  for(let i = 0; i < ca.length; i++) {
+    let c = ca[i];
+    while (c.charAt(0) == ' ') {
+      c = c.substring(1);
+    }
+    if (c.indexOf(name) == 0) {
+      return c.substring(name.length, c.length);
+    }
+  }
+  return "";
+}
 
-btn.onclick = function () {
+document.getElementById("keyInput").value = getCookie("apikey");
+document.getElementById("hostInput").value = getCookie("host");
+openModal.onclick = function () {
   modal.style.display = "block";
 };
 
@@ -34,14 +54,24 @@ function initAmount() {
 }
 
 
-const input = document.getElementById("my-input");
+const input = document.getElementById("date_picker");
 const datepicker = new TheDatepicker.Datepicker(input);
 datepicker.render();
 
-var bttn = document.getElementById("modal_submit");
-bttn.onclick = function () {
-  let apikey = document.getElementById("keyInput").value;
-  let hostkey = document.getElementById("hostInput").value;
-  console.log(apikey);
-  console.log(hostkey);
-};
+window.onload = function() {
+  var modalSubmit = document.getElementById("modal_submit");
+  modalSubmit.onclick = function (event) {
+    event.preventDefault();
+    
+    let apikey = document.getElementById("keyInput").value;
+    let host = document.getElementById("hostInput").value;
+
+    document.cookie = `apikey=${apikey}`;
+    document.cookie = `host=${host}`;
+    
+    modal.style.display = "none";
+  };
+}
+function addStock () {
+
+}
