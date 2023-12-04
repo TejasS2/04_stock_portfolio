@@ -3,8 +3,13 @@ var btn = document.getElementById("myBtn");
 var span = document.getElementsByClassName("close")[0];
 var stockList = [];
 
-setCookie('apikey', prompt("API Key: "));
-setCookie('hostkey', prompt("Host: "));
+while(!getCookie('apikey')){
+  setCookie('apikey', '7f81426e23mshb5fa5f2285ccabap1c7873jsn4d251859dcde');
+}
+while(!getCookie('hostkey')){
+  setCookie('hostkey', 'twelve-data1.p.rapidapi.com');
+}
+
 if(btn){
   btn.onclick = function (){
     modal.style.display = "block";
@@ -58,7 +63,7 @@ async function fetchData(url){
 
   try{
     const response = await fetch(url, options);
-    const result = await response.text();
+    const result = await response.json();
     return result;
   }catch (error){
     console.error(error);
@@ -90,21 +95,21 @@ if(bttn){
 
     modal.style.display = "none";
 
-    const stockListUrl = 'https://twelve-data1.p.rapidapi.com/stocks?exchange=NASDAQ&format=json';
-    const timeSeriesUrl = 'https://twelve-data1.p.rapidapi.com/time_series?symbol=AMZN&interval=1day&outputsize=5000&format=json';
-
-    fetchData(stockListUrl);
-    fetchData(timeSeriesUrl);
-    console.log("hello")
   };
 }
+
+//const NASDAQListUrl = 'https://twelve-data1.p.rapidapi.com/stocks?exchange=NASDAQ&format=json';
+//const NYSEListUrl = 'https://twelve-data1.p.rapidapi.com/stocks?exchange=NYSE&format=json';
+
+//alert(fetchData(NASDAQListUrl));
+//alert(fetchData(NYSEListUrl));
 
 var addButton = document.getElementById("addStock");
 
 addButton.addEventListener("click", function (){
   var stockName = ""
   var numberOfShares = ""
-  var purchaseDate = "2023-12-02"
+  var purchaseDate = ""
 
   var newStock ={
     name: stockName,
@@ -114,31 +119,84 @@ addButton.addEventListener("click", function (){
 
   stockList.push(newStock);
 
+  const index = stockList.length - 1;
+  
+  const stockHTML = generateStockHTML(newStock, index);
+  const stockContainer = document.getElementById("stockList");
+  stockContainer.insertAdjacentHTML("beforeend", stockHTML);
+
+  setupDateChangeHandler(index);
+});
+
+document.addEventListener('DOMContentLoaded', function() {
   displayStocks();
+  stockList.forEach((_, index) => {
+    setupDateChangeHandler(index);
+  });
 });
 
 function generateStockHTML(stock, index){
   const dropdownId = `stock-dropdown-${index}`;
   const dateInputId = `date-input-${index}`;
+  const formattedDate = stock.purchaseDate ? stock.purchaseDate.split('/').reverse().join('-') : '';
+
+  fetchAndPopulateStocks(dropdownId);
 
   return `
     <div class="stockItem">
-      <button onclick="toggleDropdown('${dropdownId}')" class="btn btn-primary">
-        Stock Name: <span class="stockName">${stock.name}</span>
-      </button>
-      <div id="${dropdownId}" class="dropdown-content" style="display: none;">
+      <div id="${dropdownId}" class="dropdown-content">
         <select class="form-select stock-select" onchange="updateStockName(this, ${index})">
           <!-- Stock options will be dynamically populated here -->
         </select>
       </div>
-      <button onclick="editStock('numberOfShares', this, ${index})" class="btn btn-primary">Number of Shares: <span class="numberOfShares">${stock.shares}</span></button>
+      <div>
+        <label for="date-input-${index}" class="form-label">Number of Shares:</label>
+        <input type="number" class="form-control numberOfShares" value="${stock.shares}" onchange="editStock('numberOfShares', this, ${index})">
+      </div>
       <div>
         <label for="${dateInputId}" class="form-label">Purchase Date:</label>
-        <input type="text" id="${dateInputId}" value="${stock.date}" class="form-control datepicker">
+        <input type="date" id="${dateInputId}" value="${formattedDate}" class="form-control datepicker">
       </div>
     </div>
     <br>
   `;
+}
+async function fetchAndPopulateStocks(dropdownId) {
+  const stockListUrl = 'https://twelve-data1.p.rapidapi.com/stocks?exchange=NASDAQ&format=json';
+  try {
+    const response = await fetchData(stockListUrl);
+    if (response && response.data) {
+      populateDropdown(dropdownId, response.data);
+    } else {
+      console.error('Stock data is not available in the response');
+    }
+  } catch (error) {
+    console.error('Failed to fetch stocks:', error);
+  }
+}
+
+function populateDropdown(dropdownId, stocks) {
+  const dropdown = document.getElementById(dropdownId);
+  dropdown.innerHTML = '';
+
+  dropdown.appendChild(new Option('Select a stock', ''));
+
+  stocks.forEach(stock => {
+    const option = new Option(`${stock.name} (${stock.symbol})`, stock.symbol);
+    dropdown.appendChild(option);
+  });
+}
+function updateStockName(selectElement, index){
+  const selectedStockName = selectElement.options[selectElement.selectedIndex].text;
+  const selectedStockSymbol = selectElement.value;
+
+  stockList[index].name = selectedStockName;
+  stockList[index].symbol = selectedStockSymbol;
+
+  const stockNameSpan = document.querySelector(`#stock-dropdown-${index} .stockName`);
+  if(stockNameSpan){
+    stockNameSpan.textContent = selectedStockName;
+  }
 }
 
 function toggleDropdown(dropdownId){
@@ -167,6 +225,12 @@ function initializeDatePicker(index) {
   }
 }
 
+function setupDateChangeHandler(index) {
+  const dateInput = document.getElementById(`date-input-${index}`);
+  dateInput.addEventListener('change', function(event) {
+    stockList[index].purchaseDate = event.target.value;
+  });
+}
 
 
 
@@ -180,7 +244,8 @@ function displayStocks(){
   stockList.forEach((stock, index) =>{
     const stockHTML = generateStockHTML(stock, index);
     stockContainer.insertAdjacentHTML("beforeend", stockHTML);
-    initializeDatePicker(index);
+    //initializeDatePicker(index);
+    setupDateChangeHandler(index);
   });
 }
 
@@ -198,5 +263,5 @@ function editStock(infoType, element, index){
     stockList[index].shares = newValue;
   }
 
-  displayStocks();
+  //displayStocks();
 }
