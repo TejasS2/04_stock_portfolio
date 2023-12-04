@@ -9,25 +9,26 @@ class Stock {
     this.date = date;
   }
 }
+while(!getCookie('apikey')){
+  setCookie('apikey', prompt("API Key: "));
+}
+while(!getCookie('host')){
+  setCookie('host', prompt("Host: "));
+}
 
-function getCookie(cname) {
-  let name = cname + "=";
-  let decodedCookie = decodeURIComponent(document.cookie);
-  let ca = decodedCookie.split(';');
-  for(let i = 0; i < ca.length; i++) {
-    let c = ca[i];
-    while (c.charAt(0) == ' ') {
-      c = c.substring(1);
-    }
-    if (c.indexOf(name) == 0) {
-      return c.substring(name.length, c.length);
+function getCookie(name){
+  const cookies = document.cookie.split('; ');
+  for(let i = 0; i < cookies.length; i++){
+    const [cookieName, cookieValue] = cookies[i].split('=');
+    if(cookieName === name){
+      return decodeURIComponent(cookieValue);
     }
   }
-  return "";
+  return null;
 }
 function initAmount() {
   var x = document.getElementById("amountInput");
-  if (!isNaN(x.value)) {
+  if (!isNaN(x.value) &&  x > 0 && x != "") {
     amount = x.value;
     document.getElementById("amountInput").disabled = true;
   } else {
@@ -53,6 +54,10 @@ window.onclick = function (event) {
   }
 };
 
+function setCookie(name, value){
+  document.cookie = name + "=" + encodeURIComponent(value) + "; path=/";
+}
+
 window.onload = function() {
   var modalSubmit = document.getElementById("modal_submit");
   modalSubmit.onclick = function (event) {
@@ -61,14 +66,17 @@ window.onload = function() {
     let apikey = document.getElementById("keyInput").value;
     let host = document.getElementById("hostInput").value;
 
-    document.cookie = `apikey=${apikey}`;
-    document.cookie = `host=${host}`;
+    setCookie('apikey', apikey);
+    setCookie('host', host);
+
 
     modal.style.display = "none";
   };
 }
 
 const url = 'https://twelve-data1.p.rapidapi.com/stocks?exchange=NASDAQ&format=json';
+const urlE = 'https://twelve-data1.p.rapidapi.com/stocks?exchange=NYSE&format=json';
+
 let initVal = 1000000;
 const options = {
     method: 'GET',
@@ -82,13 +90,16 @@ const loadStockOptions = async function(){
     const response = await fetch(url, options);
     const result = await response.json();
     console.log(result.data);
-    addStock(result.data);
+    const responseE = await fetch(urlE, options);
+    const resultE = await responseE.json();
+    console.log(resultE.data);
+    addStock(result.data, resultE.data);
   } catch (error) {
     console.error(error);
   }
 }
 var numStocks = 0;
-function addStock (data) {
+function addStock (data, dataE) {
   result = `
   <div class="container mt-4">
       <div class="row">
@@ -97,8 +108,13 @@ function addStock (data) {
             <label for="stocks">Select Stock:</label>
             <select class="form-control stocks" id="stockSelect-${numStocks}">`
   for (const stock of data) {
-    let optionHtml = `<option value="${stock.name}">
-    ${stock.name}</option>`;
+    let optionHtml = `<option value="${stock.symbol}">
+    ${stock.symbol}</option>`;
+    result += optionHtml;
+  }
+  for (const stock of dataE) {
+    optionHtml = `<option value="${stock.symbol}">
+    ${stock.symbol}</option>`;
     result += optionHtml;
   }
   result += `
@@ -126,17 +142,100 @@ function addStock (data) {
 document.getElementById("add_stock").addEventListener("click", function() {
   loadStockOptions();
 });
-document.getElementById("results").addEventListener("click", function(event) {
-  var stocks = [];
-  event.preventDefault();
-  result = "<table>";
-  for(var i = 0; i < numStocks; i++){
-    stock_name = document.getElementById(`stockSelect-${i}`).value;
-    stock_shares = document.getElementById(`shares-${i}`).value;
-    stock_date = document.getElementById(`date-${i}`).value;
-    let stock = new Stock(stock_name, stock_shares, stock_name);
-    stocks += stock;
-    console.log(stocks);
+
+
+function generateDateArray(startDate, endDate) {
+  var dateArray = [];
+  var currentDate = new Date(startDate.getTime()); // Clone startDate to avoid mutating it
+
+  while (currentDate <= endDate) {
+    dateArray.push(currentDate.toISOString().split('T')[0]);
+    currentDate = new Date(currentDate.setDate(currentDate.getDate() + 1));
   }
-  document.getElementById("stocks_form").insertAdjacentHTML("afterend",result);
+
+  return dateArray;
+}
+
+document.getElementById("results").addEventListener("click", async function(event) {
+  event.preventDefault();
+  document.getElementById('portfolioResults').querySelector('tbody').innerHTML = '';
+  var earliestDate;
+  var today = new Date();
+  var currentDate = today.toISOString().split('T')[0];
+
+  // Determine the earliest purchase date from your stock data
+  for (var i = 0; i < numStocks; i++) {
+    let stock_date = document.getElementById(`date-${i}`).value;
+    if (!earliestDate || new Date(stock_date) < new Date(earliestDate)) {
+      earliestDate = stock_date;
+    }
+  }
+
+  // Generate an array of dates from earliestDate to currentDate
+  let dates = generateDateArray(new Date(earliestDate), new Date(currentDate));
+
+  // Initialize an object to store the portfolio value by date
+  var portfolioValuesByDate = {};
+  dates.forEach(date => portfolioValuesByDate[date] = { totalValue: 0, pnl: 0 });
+
+  // Calculate initial investment and store it
+  var totalInitialInvestment = 0;
+  for (var i = 0; i < numStocks; i++) {
+    let stock_name = document.getElementById(`stockSelect-${i}`).value;
+    let stock_shares = parseInt(document.getElementById(`shares-${i}`).value);
+    let stock_date = document.getElementById(`date-${i}`).value;
+    let stockPrice = await fetchStockPrice(stock_name, stock_date);
+    totalInitialInvestment += stock_shares * stockPrice;
+  }
+
+  // Fetch the daily stock values and calculate portfolio values
+  for (var i = 0; i < numStocks; i++) {
+    let stock_name = document.getElementById(`stockSelect-${i}`).value;
+    let stock_shares = parseInt(document.getElementById(`shares-${i}`).value);
+
+    for (const date of dates) {
+      let stockPrice = await fetchStockPrice(stock_name, date);
+      portfolioValuesByDate[date].totalValue += stock_shares * stockPrice;
+    }
+  }
+
+  // Calculate daily P&L relative to the initial investment
+  for (const date of dates) {
+    let dailyValue = portfolioValuesByDate[date].totalValue;
+    portfolioValuesByDate[date].pnl = dailyValue - totalInitialInvestment;
+
+    // Insert row into table in descending order
+    let tableBody = document.getElementById('portfolioResults').querySelector('tbody');
+    let row = `<tr>
+                  <td>${date}</td>
+                  <td>${dailyValue.toFixed(2)}</td>
+                  <td>${portfolioValuesByDate[date].pnl.toFixed(2)}</td>
+               </tr>`;
+    tableBody.insertAdjacentHTML("afterbegin", row);
+  }
 });
+
+
+async function fetchStockPrice(stockSymbol, date) {
+  try {
+    const urlA = `https://twelve-data1.p.rapidapi.com/time_series?symbol=${stockSymbol}&interval=1day&outputsize=5000&format=json`;
+
+    const responseA = await fetch(urlA, options);
+
+    if (!responseA.ok) {
+      throw new Error(`API call failed with status: ${responseA.status}`);
+    }
+
+    const dataA = await responseA.json();
+
+    // Find the closing price for the specified date within the returned data
+    const closingPrice = dataA.values.find(d => d.datetime === date)?.close;
+    if(closingPrice) console.log(closingPrice)
+
+    // Return the closing price, or null if not found
+    return closingPrice ? parseFloat(closingPrice) : null;
+  } catch (error) {
+    console.error('Error fetching stock price:', error);
+    return null;
+  }
+}
