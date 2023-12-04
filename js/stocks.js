@@ -81,6 +81,42 @@ window.onload = function() {
     modal.style.display = "none";
   };
 }
+
+let stockContainer = document.querySelector(".stockSelect");
+const url = 'https://twelve-data1.p.rapidapi.com/stocks?exchange=NASDAQ&format=json';
+document.cookie="key=e64bc78181msh84af989eb88db6bp175393jsnb6a8429b02ed";
+document.cookie="host=twelve-data1.p.rapidapi.com";
+let initVal = 1000000;
+const options = {
+    method: 'GET',
+    headers: {
+        'X-RapidAPI-Key': 'e64bc78181msh84af989eb88db6bp175393jsnb6a8429b02ed',
+        'X-RapidAPI-Host': 'twelve-data1.p.rapidapi.com'
+    }
+};
+const initialize = async function(){
+    try {
+        const response = await fetch(url, options);
+        const result = await response.json();
+        console.log(result.data[0]);
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+
+$(function () {
+  $('.date_picker').date_picker({
+    language: "es",
+    autoclose: true,
+    format: "yyyy-mm-dd"
+  });
+});
+
+
+
+
+
 function addStock () {
 
 }
