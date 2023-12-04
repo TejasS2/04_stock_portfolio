@@ -146,7 +146,7 @@ document.getElementById("add_stock").addEventListener("click", function() {
 
 function generateDateArray(startDate, endDate) {
   var dateArray = [];
-  var currentDate = new Date(startDate.getTime()); // Clone startDate to avoid mutating it
+  var currentDate = new Date(startDate.getTime());
 
   while (currentDate <= endDate) {
     dateArray.push(currentDate.toISOString().split('T')[0]);
@@ -163,7 +163,6 @@ document.getElementById("results").addEventListener("click", async function(even
   var today = new Date();
   var currentDate = today.toISOString().split('T')[0];
 
-  // Determine the earliest purchase date from your stock data
   for (var i = 0; i < numStocks; i++) {
     let stock_date = document.getElementById(`date-${i}`).value;
     if (!earliestDate || new Date(stock_date) < new Date(earliestDate)) {
@@ -171,14 +170,11 @@ document.getElementById("results").addEventListener("click", async function(even
     }
   }
 
-  // Generate an array of dates from earliestDate to currentDate
   let dates = generateDateArray(new Date(earliestDate), new Date(currentDate));
 
-  // Initialize an object to store the portfolio value by date
   var portfolioValuesByDate = {};
   dates.forEach(date => portfolioValuesByDate[date] = { totalValue: 0, pnl: 0 });
 
-  // Calculate initial investment and store it
   var totalInitialInvestment = 0;
   for (var i = 0; i < numStocks; i++) {
     let stock_name = document.getElementById(`stockSelect-${i}`).value;
@@ -188,7 +184,6 @@ document.getElementById("results").addEventListener("click", async function(even
     totalInitialInvestment += stock_shares * stockPrice;
   }
 
-  // Fetch the daily stock values and calculate portfolio values
   for (var i = 0; i < numStocks; i++) {
     let stock_name = document.getElementById(`stockSelect-${i}`).value;
     let stock_shares = parseInt(document.getElementById(`shares-${i}`).value);
@@ -199,12 +194,10 @@ document.getElementById("results").addEventListener("click", async function(even
     }
   }
 
-  // Calculate daily P&L relative to the initial investment
   for (const date of dates) {
     let dailyValue = portfolioValuesByDate[date].totalValue;
     portfolioValuesByDate[date].pnl = dailyValue - totalInitialInvestment;
 
-    // Insert row into table in descending order
     let tableBody = document.getElementById('portfolioResults').querySelector('tbody');
     let row = `<tr>
                   <td>${date}</td>
@@ -215,27 +208,34 @@ document.getElementById("results").addEventListener("click", async function(even
   }
 });
 
+var stockPrices = {};
 
 async function fetchStockPrice(stockSymbol, date) {
+  if (!(stockSymbol in stockPrices)) {
+    await fetchPrice(stockSymbol);
+  }
+
+  let dataPrice = stockPrices[stockSymbol];
+
+  const closingPrice = dataPrice.values.find(d => d.datetime === date)?.close;
+
+  if (closingPrice) console.log(closingPrice);
+  return closingPrice ? parseFloat(closingPrice) : null;
+}
+
+async function fetchPrice(stockSymbol) {
   try {
-    const urlA = `https://twelve-data1.p.rapidapi.com/time_series?symbol=${stockSymbol}&interval=1day&outputsize=5000&format=json`;
+    const url = `https://twelve-data1.p.rapidapi.com/time_series?symbol=${stockSymbol}&interval=1day&outputsize=5000&format=json`;
+    const response = await fetch(url, options);
 
-    const responseA = await fetch(urlA, options);
-
-    if (!responseA.ok) {
-      throw new Error(`API call failed with status: ${responseA.status}`);
+    if (!response.ok) {
+      throw new Error(`API call failed with status: ${response.status}`);
     }
 
-    const dataA = await responseA.json();
-
-    // Find the closing price for the specified date within the returned data
-    const closingPrice = dataA.values.find(d => d.datetime === date)?.close;
-    if(closingPrice) console.log(closingPrice)
-
-    // Return the closing price, or null if not found
-    return closingPrice ? parseFloat(closingPrice) : null;
+    const data = await response.json();
+    stockPrices[stockSymbol] = data; // Store fetched data in stockPrices
   } catch (error) {
     console.error('Error fetching stock price:', error);
-    return null;
+    return null; // In case of an error, return null
   }
 }
