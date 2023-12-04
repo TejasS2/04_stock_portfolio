@@ -104,7 +104,7 @@ var addButton = document.getElementById("addStock");
 addButton.addEventListener("click", function (){
   var stockName = ""
   var numberOfShares = ""
-  var purchaseDate = ""
+  var purchaseDate = "2023-12-02"
 
   var newStock ={
     name: stockName,
@@ -136,7 +136,7 @@ function generateStockHTML(stock, index){
         <label for="${dateInputId}" class="form-label">Purchase Date:</label>
         <input type="text" id="${dateInputId}" value="${stock.date}" class="form-control datepicker">
       </div>
-      </div>
+    </div>
     <br>
   `;
 }
@@ -152,19 +152,22 @@ function updateStockName(selectElement, index){
   displayStocks();
 }
 
-function initializeDatePicker(index){
+function initializeDatePicker(index) {
   const dateInputId = `date-input-${index}`;
   const dateInput = document.getElementById(dateInputId);
 
   if(dateInput){
     const datepicker = new TheDatepicker.Datepicker(dateInput);
-    datepicker.render();
     datepicker.options.setMinDate(new Date(new Date().setFullYear(new Date().getFullYear() - 10)));
-    datepicker.options.onSelect((selectedDate, datepicker) =>{
-      stockList[index].purchaseDate = datepicker.options.getInputFormat()(selectedDate, datepicker);
+    datepicker.options.onSelect((selectedDate, datepicker) => {
+      alert(selectedDate)
+      stockList[index].date = datepicker.getSelectedDate();
     });
+    datepicker.render();
   }
 }
+
+
 
 
 
@@ -175,9 +178,9 @@ function displayStocks(){
   const stockContainer = document.getElementById("stockList");
   stockContainer.innerHTML = "";
   stockList.forEach((stock, index) =>{
-    initializeDatePicker(index);
     const stockHTML = generateStockHTML(stock, index);
     stockContainer.insertAdjacentHTML("beforeend", stockHTML);
+    initializeDatePicker(index);
   });
 }
 
