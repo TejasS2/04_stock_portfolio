@@ -1,9 +1,15 @@
 var modal = document.getElementById("myModal");
 var openModal = document.getElementById("openModal");
 var span = document.getElementsByClassName("close")[0];
+
 class Stock {
-  
+  constructor (name, share, date){
+    this.name = name;
+    this.share = share;
+    this.date = date;
+  }
 }
+
 function getCookie(cname) {
   let name = cname + "=";
   let decodedCookie = decodeURIComponent(document.cookie);
@@ -19,9 +25,20 @@ function getCookie(cname) {
   }
   return "";
 }
+function initAmount() {
+  var x = document.getElementById("amountInput");
+  if (!isNaN(x.value)) {
+    amount = x.value;
+    document.getElementById("amountInput").disabled = true;
+  } else {
+    x.value = 100;
+    alert("Please enter a number");
+  }
+}
 
 document.getElementById("keyInput").value = getCookie("apikey");
 document.getElementById("hostInput").value = getCookie("host");
+
 openModal.onclick = function () {
   modal.style.display = "block";
 };
@@ -35,38 +52,6 @@ window.onclick = function (event) {
     modal.style.display = "none";
   }
 };
-
-const datepickerElements = document.querySelectorAll('#date_picker');
-datepickerElements.forEach(function (element) {
-    const datepicker = new TheDatepicker.Datepicker(element);
-    datepicker.render();
-});
-
-
-function initAmount() {
-  var x = document.getElementById("amountInput");
-  if (!isNaN(x.value)) {
-    amount = x.value;
-    document.getElementById("amountInput").disabled = true;
-  } else {
-    x.value = 100;
-    alert("Please enter a number");
-  }
-}
-
-
-const input = document.getElementById("date_picker");
-const datepicker = new TheDatepicker.Datepicker(input);
-datepicker.render();
-
-var bttn = document.getElementById("modal_submit");
-bttn.onclick = function () {
-  var apikey = document.getElementById("keyInput").value;
-  var hostkey = document.getElementById("hostInput").value;
-  console.log(apikey);
-  console.log(hostkey);
-};
-
 
 window.onload = function() {
   var modalSubmit = document.getElementById("modal_submit");
@@ -83,41 +68,72 @@ window.onload = function() {
   };
 }
 
-let stockContainer = document.querySelector(".stockSelect");
+const datepickerElements = document.querySelectorAll('#date_picker');
+datepickerElements.forEach(function (element) {
+    const datepicker = new TheDatepicker.Datepicker(element);
+    datepicker.render();
+});
+
 const url = 'https://twelve-data1.p.rapidapi.com/stocks?exchange=NASDAQ&format=json';
-document.cookie="key=e64bc78181msh84af989eb88db6bp175393jsnb6a8429b02ed";
-document.cookie="host=twelve-data1.p.rapidapi.com";
 let initVal = 1000000;
 const options = {
     method: 'GET',
     headers: {
-        'X-RapidAPI-Key': 'e64bc78181msh84af989eb88db6bp175393jsnb6a8429b02ed',
-        'X-RapidAPI-Host': 'twelve-data1.p.rapidapi.com'
+        'X-RapidAPI-Key': getCookie("apikey"),
+        'X-RapidAPI-Host': getCookie("host")
     }
 };
-const initialize = async function(){
-    try {
-        const response = await fetch(url, options);
-        const result = await response.json();
-        console.log(result.data[0]);
-    } catch (error) {
-        console.error(error);
-    }
+const loadStockOptions = async function(){
+  try {
+    const response = await fetch(url, options);
+    const result = await response.json();
+    console.log(result.data);
+    addStock(result.data);
+  } catch (error) {
+    console.error(error);
+  }
 }
 
+var stocks = [];
 
-$(function () {
-  $('.date_picker').date_picker({
-    language: "es",
-    autoclose: true,
-    format: "yyyy-mm-dd"
-  });
+function addStock (data) {
+  result = `
+  <div class="container mt-4">
+      <div class="row">
+        <div class="col-md-4">
+          <div class="form-group">
+            <label for="stocks">Select Stock:</label>
+            <select class="form-control stocks" id="stockSelect">`
+  for (const stock of data) {
+    let optionHtml = `<option value="${stock.name}">
+    ${stock.name}</option>`;
+    result += optionHtml;
+  }
+  result += `
+  </select>
+  </div>
+</div>
+<div class="col-md-4">
+  <div class="form-group">
+    <label for="shares">Shares:</label>
+    <input type="number" class="form-control" id="shares" placeholder="Enter shares">
+  </div>
+</div>
+<div class="col-md-4">
+  <div class="form-group">
+    <label for="date_picker">Date Picker:</label>
+    <input type="text" class="form-control" id="date_picker">
+  </div>
+</div>
+</div>
+</div>`
+  document.querySelector(".stocks_list").insertAdjacentHTML("beforeend",result);
+}
+
+document.getElementById("add_stock").addEventListener("click", function() {
+  loadStockOptions();
 });
-
-
-
-
-
-function addStock () {
-
-}
+document.getElementById("results").addEventListener("click", function(event) {
+  event.preventDefault();
+  
+});
