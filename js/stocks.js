@@ -1,6 +1,7 @@
 var modal = document.getElementById("myModal");
 var openModal = document.getElementById("openModal");
 var span = document.getElementsByClassName("close")[0];
+let amount = 0;
 
 class Stock {
   constructor (name, share, date){
