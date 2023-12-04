@@ -36,11 +36,7 @@ window.onclick = function (event) {
   }
 };
 
-let amount = 0;
 
-document.getElementById("amountInput").onchange = function () {
-  initAmount();
-};
 
 function initAmount() {
   var x = document.getElementById("amountInput");
