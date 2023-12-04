@@ -68,12 +68,6 @@ window.onload = function() {
   };
 }
 
-const datepickerElements = document.querySelectorAll('#date_picker');
-datepickerElements.forEach(function (element) {
-    const datepicker = new TheDatepicker.Datepicker(element);
-    datepicker.render();
-});
-
 const url = 'https://twelve-data1.p.rapidapi.com/stocks?exchange=NASDAQ&format=json';
 let initVal = 1000000;
 const options = {
@@ -93,9 +87,7 @@ const loadStockOptions = async function(){
     console.error(error);
   }
 }
-
-var stocks = [];
-
+var numStocks = 0;
 function addStock (data) {
   result = `
   <div class="container mt-4">
@@ -103,7 +95,7 @@ function addStock (data) {
         <div class="col-md-4">
           <div class="form-group">
             <label for="stocks">Select Stock:</label>
-            <select class="form-control stocks" id="stockSelect">`
+            <select class="form-control stocks" id="stockSelect-${numStocks}">`
   for (const stock of data) {
     let optionHtml = `<option value="${stock.name}">
     ${stock.name}</option>`;
@@ -116,24 +108,35 @@ function addStock (data) {
 <div class="col-md-4">
   <div class="form-group">
     <label for="shares">Shares:</label>
-    <input type="number" class="form-control" id="shares" placeholder="Enter shares">
+    <input type="number" class="form-control" id="shares-${numStocks}" placeholder="Enter shares">
   </div>
 </div>
 <div class="col-md-4">
   <div class="form-group">
     <label for="date_picker">Date Picker:</label>
-    <input type="text" class="form-control" id="date_picker">
+    <input type="date" class="form-control" id="date-${numStocks}">
   </div>
 </div>
 </div>
 </div>`
   document.querySelector(".stocks_list").insertAdjacentHTML("beforeend",result);
+  numStocks++;
 }
 
 document.getElementById("add_stock").addEventListener("click", function() {
   loadStockOptions();
 });
 document.getElementById("results").addEventListener("click", function(event) {
+  var stocks = [];
   event.preventDefault();
-  
+  result = "<table>";
+  for(var i = 0; i < numStocks; i++){
+    stock_name = document.getElementById(`stockSelect-${i}`).value;
+    stock_shares = document.getElementById(`shares-${i}`).value;
+    stock_date = document.getElementById(`date-${i}`).value;
+    let stock = new Stock(stock_name, stock_shares, stock_name);
+    stocks += stock;
+    console.log(stocks);
+  }
+  document.getElementById("stocks_form").insertAdjacentHTML("afterend",result);
 });
