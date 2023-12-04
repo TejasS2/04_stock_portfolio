@@ -36,6 +36,11 @@ window.onclick = function (event) {
   }
 };
 
+const datepickerElements = document.querySelectorAll('#date_picker');
+datepickerElements.forEach(function (element) {
+    const datepicker = new TheDatepicker.Datepicker(element);
+    datepicker.render();
+});
 
 
 function initAmount() {
